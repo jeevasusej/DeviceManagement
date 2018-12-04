@@ -5,7 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DeviceManagement.Core\DeviceManagement.Core.csproj" />
+    <ProjectReference Include="..\DeviceManagement.Entity\DeviceManagement.Entity.csproj" />
   </ItemGroup>
 
 </Project>
