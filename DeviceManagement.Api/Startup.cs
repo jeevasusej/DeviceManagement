@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using DeviceManagement.Api.Middleware;
 using DeviceManagement.Core;
 using DeviceManagement.Core.UnitOfWork;
 using DeviceManagement.Entity;
@@ -63,6 +64,7 @@ namespace DeviceManagement.Api
             // app.UseHttpsRedirection();
             app.UseCors(x => x.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
             app.UseAuthentication();
+            app.UseMiddleware(typeof(ErrorHandlingMiddleware));
             app.UseMvc();
         }
     }

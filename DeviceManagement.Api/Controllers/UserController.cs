@@ -32,7 +32,7 @@ namespace DeviceManagement.Api.Controllers
         public async Task<IEnumerable<UserModel>> Get()
         {
             var users = await repository.GetUsers(Guid.NewGuid());
-            return mapper.Map<List<User>, List<UserModel>>(users);
+            return mapper.Map<IEnumerable<User>, IEnumerable<UserModel>>(users);
         }
 
         [HttpPost("UpdateUser")]
@@ -42,8 +42,18 @@ namespace DeviceManagement.Api.Controllers
             model.Username = model.Username.ToLower();
 
             var user = mapper.Map<RegisterModel, User>(model);
-            var createdUser = await repository.UpsertUser(Guid.NewGuid(), user, model.Password);
+            var createdUser = await repository.RegisterUser(Guid.NewGuid(), user, model.Password);
             return Ok(mapper.Map<User, UserModel>(createdUser));
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdatePassword(PasswordModel model)
+        {
+            // TODO VALIDATION - CHECK NULL VALUES
+
+            //var user = mapper.Map<RegisterModel, User>(model);
+            var createdUser = await repository.ChangePassword(Guid.NewGuid(), model.OldPassword, model.NewPassword);
+            return Ok();
         }
     }
 }

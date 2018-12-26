@@ -9,39 +9,22 @@ namespace DeviceManagement.Persistence
 {
     public class UserDeviceRepository : IUserDeviceRepository
     {
-        /// <summary>
-        /// Admin only can approve
-        /// </summary>
-        /// <param name="userId"></param>
-        /// <param name="deviceId"></param>
-        /// <param name="requestedUserId"></param>
-        /// <returns></returns>
-        public Task<UserDevice> ApproveDevice(Guid userId, long deviceId, long requestedUserId)
+        public Task<UserDevice> ApproveDevice(Guid adminId, long requestId)
         {
             throw new NotImplementedException();
         }
 
-        /// <summary>
-        /// Addmin only can reject 
-        /// </summary>
-        /// <param name="userId"></param>
-        /// <param name="deviceId"></param>
-        /// <param name="requestedUserId"></param>
-        /// <param name="reason"></param>
-        /// <returns></returns>
-        public Task<UserDevice> RejectDevice(Guid userId, long deviceId, long requestedUserId, string reason)
+        public Task<UserDevice> RejectDevice(Guid adminId, long requestId, string reason)
         {
             throw new NotImplementedException();
         }
 
-        /// <summary>
-        /// Request device by the user or update the requested details
-        /// Admin can update the details afer approve the device
-        /// </summary>
-        /// <param name="userId"></param>
-        /// <param name="userDevice"></param>
-        /// <returns></returns>
-        public Task<UserDevice> UpdateDeviceRequest(Guid userId, UserDevice userDevice)
+        public Task<UserDevice> RequestDevice(Guid userId, UserDevice userDevice)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<UserDevice> UpdateDeviceRequest(Guid adminId, Guid userId, UserDevice userDevice)
         {
             throw new NotImplementedException();
         }

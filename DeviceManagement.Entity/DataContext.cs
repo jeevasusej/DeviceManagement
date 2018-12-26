@@ -61,6 +61,7 @@ namespace DeviceManagement.Entity
 
             modelBuilder.Entity<UserDevice>(d =>
             {
+                d.Property(p => p.Id).ValueGeneratedOnAdd();
                 d.Property(p => p.IsApproved).HasDefaultValue(false);
                 d.Property(p => p.IsRejected).HasDefaultValue(false);
 

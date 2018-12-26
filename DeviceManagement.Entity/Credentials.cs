@@ -20,6 +20,7 @@ namespace DeviceManagement.Entity
 
         [StringLength(250)]
         public string Username { get; set; }
+        public string Comments { get; set; }
 
         [Required]
         public bool IsDeleted { get; set; }

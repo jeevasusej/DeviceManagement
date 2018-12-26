@@ -8,8 +8,9 @@ namespace DeviceManagement.Core
 {
     public interface IUserDeviceRepository
     {
-        Task<UserDevice> UpdateDeviceRequest(Guid userId, UserDevice userDevice);
-        Task<UserDevice> ApproveDevice(Guid userId, long deviceId, long requestedUserId);
-        Task<UserDevice> RejectDevice(Guid userId, long deviceId, long requestedUserId, string reason);
+        Task<UserDevice> RequestDevice(Guid userId, UserDevice userDevice);
+        Task<UserDevice> UpdateDeviceRequest(Guid adminId, Guid userId, UserDevice userDevice);
+        Task<UserDevice> ApproveDevice(Guid adminId, long requestId);
+        Task<UserDevice> RejectDevice(Guid adminId, long requestId, string reason);
     }
 }

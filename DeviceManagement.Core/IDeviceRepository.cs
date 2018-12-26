@@ -11,9 +11,9 @@ namespace DeviceManagement.Core
     {
         Task<IEnumerable<Device>> GetDevices(Guid userId);
         Task<Device> GetDevice(Guid userId, long deviceId);
-        Task<bool> DeleteDevice(Guid userId, long deviceId);
-        Task<Device> UpsertDevice(Guid userId, Device device);
-        Task<Credential> UpdateDeviceCredential(Guid userId, long deviceId, Credential credential);
-        Task<bool> RemoveDeviceCredential(Guid userId, long deviceId);
+        Task<bool> DeleteDevice(Guid adminId, long deviceId);
+        Task<Device> UpsertDevice(Guid adminId, Device device);
+        Task<Credential> UpdateDeviceCredential(Guid adminId, long deviceId, Credential credential);
+        Task<bool> RemoveDeviceCredential(Guid adminId, long deviceId);
     }
 }

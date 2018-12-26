@@ -7,6 +7,9 @@ namespace DeviceManagement.Entity
 {
     public class UserDevice
     {
+        [Key]
+        public long Id { get; set; }
+
         [Required]
         public long DeviceId { get; set; }
 

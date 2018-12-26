@@ -8,6 +8,7 @@ using System.Text;
 using System.Security.Cryptography;
 using System.Linq;
 using DeviceManagement.Entity.Enum;
+using System.ComponentModel.DataAnnotations;
 
 namespace DeviceManagement.Persistence
 {
@@ -19,7 +20,7 @@ namespace DeviceManagement.Persistence
         {
             this.context = context;
         }
-       
+
         public async Task<User> GetUser(string username, string password)
         {
             // TODO 
@@ -53,17 +54,6 @@ namespace DeviceManagement.Persistence
             return true;
         }
 
-        public async Task<bool> IsUserExists(string username)
-        {
-            // TODO
-            // VALIDATION - CHECK EMPTY
-
-            if (await context.Users.AnyAsync(u => u.UserName.Trim() == username.Trim()))
-                return true;
-
-            return false;
-        }
-
         private void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
         {
             using (var hmac = new HMACSHA512())
@@ -73,56 +63,240 @@ namespace DeviceManagement.Persistence
             }
         }
 
-        public async Task<List<User>> GetUsers(Guid userId)
+        public async Task<IEnumerable<User>> GetUsers(Guid adminId)
         {
-            return await context.Users.Where(u => u.IsDeleted == false).ToListAsync();
+            CheckAdminAccess(adminId);
+            return await context.Users.AsNoTracking().Where(u => u.IsDeleted == false).ToListAsync();
         }
 
-        public Task<bool> DeleteUser(Guid adminId, Guid userId)
+        public async Task<bool> DeleteUser(Guid adminId, Guid userId)
         {
-            throw new NotImplementedException();
+            CheckAdminAccess(adminId);
+
+            if (userId == Guid.Empty)
+                throw new ValidationException("Invalid user");
+
+            var user = await context.Users
+                                 .Where(u => u.Id == adminId)
+                                 .SingleAsync();
+
+            if (user == null)
+                throw new ValidationException("Invalid user");
+
+            user.IsDeleted = true;
+            await context.SaveChangesAsync();
+
+            return true;
         }
 
-        public Task<bool> ChangeUserState(Guid userId, bool isActive)
+        public async Task<bool> ChangeUserState(Guid adminId, Guid userId, bool isActive)
         {
-            throw new NotImplementedException();
+            CheckAdminAccess(adminId);
+
+            if (userId == Guid.Empty)
+                throw new ValidationException("Invalid user");
+
+            var user = await context.Users
+                                .Where(u => u.Id == adminId && !u.IsDeleted)
+                                .SingleAsync();
+
+            if (user == null)
+                throw new ValidationException("Invalid user");
+
+            user.IsActive = isActive;
+            await context.SaveChangesAsync();
+
+            return true;
         }
 
-        public async Task<User> UpsertUser(Guid userId, User user, string password)
+        public async Task<User> RegisterUser(Guid adminId, User user, string password)
         {
-             // TODO : VALIDATIONS
-            // Empty for Username, Password, Name and Email
-            // Length for username, password, name and email
-            // Admin only can add a user
+            // TODO : VALIDATIONS
             // when add user, check for the password empty
             // when update user, it could be empty
+            CheckAdminAccess(adminId);
+
+            ValidateUserDetails(user);
+
+            if (string.IsNullOrWhiteSpace(password))
+                throw new ValidationException("Invalid user password");
+
+            if (string.IsNullOrWhiteSpace(user.UserName))
+                throw new ValidationException("Invalid user name.");
+
+            var _user = context.Users
+                                .Where(u => u.UserName.Trim().ToLower() == user.UserName.Trim().ToLower())
+                                .FirstOrDefault();
+
+            if (_user != null)
+                throw new ValidationException("User already exists.");
+
+            _user.UserName= user.UserName;
+            _user.Name = user.Name;
+            _user.Email = user.Email;
 
             byte[] passwordHash, passwordSalt;
 
-            if (await IsUserExists(user.UserName))
-                throw new Exception("User name is exists.");
-
             CreatePasswordHash(password, out passwordHash, out passwordSalt);
+            _user.PasswordHash = passwordHash;
+            _user.PasswordSalt = passwordSalt;
+
+            _user.IsActive = true;
+            _user.IsDeleted = false;
+            _user.RoleId = (byte)UserRole.User;
+            await context.Users.AddAsync(_user);
+            await context.SaveChangesAsync();
+
+            return _user;
+        }
+
+        internal async Task<Role> GetUserRole(Guid userId)
+        {
+            if (userId == Guid.Empty)
+                throw new ValidationException("Invalid user");
+
+            var user = await context.Users
+                                        .AsNoTracking()
+                                        .Include(u => u.Role)
+                                        .Where(u => u.Id == userId && !u.IsDeleted)
+                                        .SingleAsync();
+
+            if (user == null || user.Role == null)
+                throw new ValidationException("Invalid user");
+
+            return user.Role;
+        }
+
+        public async Task<Role> GetUserRole(Guid adminId, Guid userId)
+        {
+            CheckAdminAccess(adminId);
+
+            if (userId == Guid.Empty)
+                throw new ValidationException("Invalid user");
+
+            var user = await context.Users
+                            .AsNoTracking()
+                            .Include(u => u.Role)
+                            .Where(u => u.Id == userId && u.IsDeleted == false)
+                            .SingleAsync();
+
+            if (user == null)
+                throw new InvalidOperationException("User is not found");
+
+            return user.Role;
+        }
+
+        public async Task<bool> ChangePassword(Guid userId, string oldPassword, string newPassword)
+        {
+            if (userId == Guid.Empty)
+                throw new ValidationException("Invalid user id");
+
+            if (string.IsNullOrWhiteSpace(oldPassword))
+                throw new ValidationException("Password should not empty");
+
+            if (string.IsNullOrWhiteSpace(newPassword))
+                throw new ValidationException("Password should not empty");
+
+            var user = await GetUser(userId);
+
+            if (!VerifyPasswordHash(oldPassword, user.PasswordHash, user.PasswordSalt))
+                throw new InvalidOperationException("Your old password doesnot match.");
+
+            byte[] passwordHash, passwordSalt;
+            CreatePasswordHash(newPassword, out passwordHash, out passwordSalt);
+
             user.PasswordHash = passwordHash;
             user.PasswordSalt = passwordSalt;
 
-            user.IsActive = true;
-            user.IsDeleted = false;
-            user.RoleId = (byte)UserRole.User;
-            await context.Users.AddAsync(user);
             await context.SaveChangesAsync();
 
-            return user;
+            return true;
         }
 
-        internal Task<Role> GetUserRole(Guid userId)
+        internal Task<User> GetUser(Guid userId)
         {
-            throw new NotImplementedException();
+            if (userId == Guid.Empty)
+                throw new ValidationException("Invalid user id");
+
+            return context.Users
+                        .Where(u => u.Id == userId && !u.IsDeleted)
+                        .SingleOrDefaultAsync();
         }
 
-        public Task<Role> GetUserRole(Guid adminId, Guid userId)
+        public async Task<User> UpdateUser(Guid adminId, Guid userId, User user)
         {
-            throw new NotImplementedException();
+            CheckAdminAccess(adminId);
+
+            if (userId == Guid.Empty)
+                throw new ValidationException("Invalid user");
+
+            ValidateUserDetails(user);
+            var _user = await GetUser(userId);
+
+            _user.Name = user.Name;
+            _user.Email = user.Email;
+
+            await context.SaveChangesAsync();
+
+            return _user;
+        }
+
+        public async Task<bool> UpdateUserPassword(Guid adminId, Guid userId, string password)
+        {
+            CheckAdminAccess(adminId);
+
+            if (userId == Guid.Empty)
+                throw new ValidationException("Invalid user");
+
+            if(string.IsNullOrWhiteSpace(password))
+                throw new ValidationException("Invalid password");
+
+            var user = await GetUser(userId);
+
+            byte[] passwordHash, passwordSalt;
+            CreatePasswordHash(password, out passwordHash, out passwordSalt);
+
+            user.PasswordHash = passwordHash;
+            user.PasswordSalt = passwordSalt;
+
+            await context.SaveChangesAsync();
+
+            return true;
+        }
+
+        private void ValidateUserDetails(User user)
+        {
+            if (user == null)
+                throw new ValidationException("Invalid user");
+
+            if (string.IsNullOrWhiteSpace(user.Name))
+                throw new ValidationException("Invalid user name");
+
+            if (string.IsNullOrWhiteSpace(user.Email))
+                throw new ValidationException("Invalid user email");
+        }
+
+        public Task<User> GetUser(Guid adminId, Guid userId)
+        {
+            CheckAdminAccess(adminId);
+
+            if (userId == Guid.Empty)
+                throw new ValidationException("Invalid user");
+
+            return context.Users.AsNoTracking()
+                            .Where(u => u.Id == userId && !u.IsDeleted)
+                            .SingleOrDefaultAsync();
+        }
+
+        internal void CheckAdminAccess(Guid userId)
+        {
+            if (userId == Guid.Empty)
+                throw new ValidationException("Invalid user");
+
+            var role = GetUserRole(userId);
+
+            if (role.Id != (byte)UserRole.Admin || role.Id != (byte)UserRole.Superadmin)
+                throw new UnauthorizedAccessException("Invalid user access");
         }
     }
 }
