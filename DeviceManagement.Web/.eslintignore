@@ -1,0 +1,4 @@
+# Ignore files
+build/*
+src/serviceWorker.ts
+src/**/__tests__/**

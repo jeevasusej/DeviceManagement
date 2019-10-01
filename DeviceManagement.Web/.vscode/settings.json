@@ -1,0 +1,10 @@
+{
+    "eslint.run": "onType",
+    "eslint.validate":  [
+        "javascript",
+        "javascriptreact",
+        {"language":  "typescript",  "autoFix":  false  },
+        {"language":  "typescriptreact",  "autoFix":  false  }
+    ],
+    "eslint.autoFixOnSave": true,
+}

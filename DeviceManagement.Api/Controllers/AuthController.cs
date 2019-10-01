@@ -1,17 +1,15 @@
-﻿using System.Security.Claims;
+﻿using System;
+using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
-using AutoMapper;
-using Microsoft.Extensions.Configuration;
-using DeviceManagement.Api.Models;
-using DeviceManagement.Core;
-using DeviceManagement.Core.UnitOfWork;
+using DeviceManagement.BL.Contracts;
+using DeviceManagement.BL.Modal;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
-using System;
-using System.IdentityModel.Tokens.Jwt;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace DeviceManagement.Api.Controllers
 {
@@ -19,51 +17,52 @@ namespace DeviceManagement.Api.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private readonly IMapper mapper;
-        private readonly IUserRepository repository;
-        private readonly IUnitOfWork unitOfWork;
-        private readonly IConfiguration config;
+        private readonly IAuthBL _auth;
+        private readonly IConfiguration _config;
 
-        public AuthController(IMapper mapper, IUserRepository repository, IUnitOfWork unitOfWork, IConfiguration config)
+        public AuthController(IAuthBL auth, IConfiguration config)
         {
-            this.mapper = mapper;
-            this.repository = repository;
-            this.unitOfWork = unitOfWork;
-            this.config = config;
+            _auth = auth;
+            _config = config;
+        }
+
+        [HttpPost("Register")]
+        public async Task<IActionResult> Register(RegisterModal user)
+        {
+            user.Username = user.Username.Trim().ToLower();
+            user.Email = user.Email.Trim().ToLower();
+
+            var createdUser = await _auth.CreateUser(user, user.Password);
+            return Ok(createdUser);
         }
 
         [HttpPost("Login")]
-        public async Task<IActionResult> Login(LoginModel login)
+        public async Task<IActionResult> Login(LoginModal user)
         {
-            var user = await repository.GetUser(login.Username, login.Password);
-
-            if (user == null)
+            var userDetail = await _auth.GetUser(user.Username, user.Password);
+            if (userDetail == null)
                 return Unauthorized();
 
-            var cliams = new[] {
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Name, user.UserName),
-                new Claim(ClaimTypes.Role, user.Role.Name)
-                 //new Claim("Role",Input.Id)
+            var claims = new[]
+            {
+                new Claim(ClaimTypes.NameIdentifier, userDetail.Id.ToString()),
+                new Claim(ClaimTypes.Name, userDetail.Username),
+                new Claim(ClaimTypes.GivenName, userDetail.Name),
+            };
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config.GetSection("AppSettings:Token").Value));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
+            var tokendescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(claims),
+                Expires = DateTime.Now.AddMinutes(10),
+                SigningCredentials = creds
             };
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config.GetSection("AppSettings:Token").Value));
-            var cred = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
+            var tokenhandler = new JwtSecurityTokenHandler();
+            var token = tokenhandler.CreateToken(tokendescriptor);
 
-            var tokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = new ClaimsIdentity(cliams),
-                Expires = DateTime.Now.AddDays(1),
-                SigningCredentials = cred,
-                NotBefore = DateTime.Now
-            };
-
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var token = tokenHandler.CreateToken(tokenDescriptor);
-
-            return Ok(new
-            {
-                token = tokenHandler.WriteToken(token)
+            return Ok(new {
+                token = tokenhandler.WriteToken(token)
             });
         }
     }
