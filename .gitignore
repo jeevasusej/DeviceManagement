@@ -1,1 +1,11 @@
 .vs
+DeviceManagement.BL/bin/
+DeviceManagement.BL/obj/
+*/obj/*
+*/bin/*
+
+DeviceManagement.BL/obj/Debug/netcoreapp3.1/DeviceManagement.BL.csprojAssemblyReference.cache
+DeviceManagement.Common/bin/Debug/netcoreapp3.1/DeviceManagement.Common.dll
+DeviceManagement.Common/bin/Debug/netcoreapp3.1/DeviceManagement.Common.pdb
+*.dll
+*.pdb

@@ -1,6 +1,5 @@
 ﻿using DeviceManagement.BL.Constants;
 using DeviceManagement.BL.Dto;
-using DeviceManagement.DL.Enum;
 using System;
 using System.Collections.Generic;
 using System.Text;

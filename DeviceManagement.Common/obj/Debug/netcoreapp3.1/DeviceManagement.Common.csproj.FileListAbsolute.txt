@@ -6,3 +6,11 @@ D:\github\DeviceManagment2\DeviceManagement\DeviceManagement.Common\obj\Debug\ne
 D:\github\DeviceManagment2\DeviceManagement\DeviceManagement.Common\obj\Debug\netcoreapp3.1\DeviceManagement.Common.AssemblyInfo.cs
 D:\github\DeviceManagment2\DeviceManagement\DeviceManagement.Common\obj\Debug\netcoreapp3.1\DeviceManagement.Common.dll
 D:\github\DeviceManagment2\DeviceManagement\DeviceManagement.Common\obj\Debug\netcoreapp3.1\DeviceManagement.Common.pdb
+D:\github\DeviceManagement\DeviceManagement.Common\bin\Debug\netcoreapp3.1\DeviceManagement.Common.deps.json
+D:\github\DeviceManagement\DeviceManagement.Common\bin\Debug\netcoreapp3.1\DeviceManagement.Common.dll
+D:\github\DeviceManagement\DeviceManagement.Common\bin\Debug\netcoreapp3.1\DeviceManagement.Common.pdb
+D:\github\DeviceManagement\DeviceManagement.Common\obj\Debug\netcoreapp3.1\DeviceManagement.Common.csprojAssemblyReference.cache
+D:\github\DeviceManagement\DeviceManagement.Common\obj\Debug\netcoreapp3.1\DeviceManagement.Common.AssemblyInfoInputs.cache
+D:\github\DeviceManagement\DeviceManagement.Common\obj\Debug\netcoreapp3.1\DeviceManagement.Common.AssemblyInfo.cs
+D:\github\DeviceManagement\DeviceManagement.Common\obj\Debug\netcoreapp3.1\DeviceManagement.Common.dll
+D:\github\DeviceManagement\DeviceManagement.Common\obj\Debug\netcoreapp3.1\DeviceManagement.Common.pdb

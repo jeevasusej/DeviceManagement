@@ -1,4 +1,5 @@
-﻿using DeviceManagement.DL.Enum;
+﻿using DeviceManagement.DL;
+using DeviceManagement.DL.Enum;
 using System;
 using System.Collections.Generic;
 using System.Text;

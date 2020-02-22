@@ -20,6 +20,7 @@ namespace DeviceManagement.DL
         }
         public async void CreateUser(User user)
         {
+            user.RoleId = (byte)RoleType.User;
             await _context.Users.AddAsync(user);
         }
 
