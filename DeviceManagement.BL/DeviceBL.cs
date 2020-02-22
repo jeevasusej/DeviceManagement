@@ -2,8 +2,8 @@
 using DeviceManagement.BL.Constants;
 using DeviceManagement.BL.Contracts;
 using DeviceManagement.BL.Dto;
-using DeviceManagement.Persistence.Contracts.UnitOfWork;
-using DeviceManagement.Persistence.Enum;
+using DeviceManagement.DL.Contracts.UnitOfWork;
+using DeviceManagement.DL.Enum;
 using System;
 using System.Collections.Generic;
 using System.Text;

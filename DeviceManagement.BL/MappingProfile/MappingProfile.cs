@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using DeviceManagement.BL.Dto;
 using DeviceManagement.BL.Modal;
-using DeviceManagement.Persistence.Modal;
+using DeviceManagement.DL.Modal;
 using System;
 using System.Collections.Generic;
 using System.Text;

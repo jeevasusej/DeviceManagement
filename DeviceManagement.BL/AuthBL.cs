@@ -2,8 +2,8 @@
 using DeviceManagement.BL.Contracts;
 using DeviceManagement.BL.Dto;
 using DeviceManagement.BL.Modal;
-using DeviceManagement.Persistence.Contracts.UnitOfWork;
-using DeviceManagement.Persistence.Modal;
+using DeviceManagement.DL.Contracts.UnitOfWork;
+using DeviceManagement.DL.Modal;
 using System;
 using System.Collections.Generic;
 using System.Text;
