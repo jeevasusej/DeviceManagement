@@ -8,6 +8,7 @@ using System.Text;
 using DeviceManagement.BL.MappingProfile;
 using FluentValidation;
 using DeviceManagement.BL.Modal;
+using FluentValidation.AspNetCore;
 
 namespace DeviceManagement.BL
 {
@@ -15,9 +16,12 @@ namespace DeviceManagement.BL
     {
         public static IServiceCollection AddBLDependency(this IServiceCollection services, IConfiguration configuration)
         {
+            services.AddMvc().AddFluentValidation(fv =>
+            {
+                fv.RunDefaultMvcValidationAfterFluentValidationExecutes = false;
+            }); 
             ValidatorOptions.CascadeMode = CascadeMode.StopOnFirstFailure;
             services.AddTransient<IValidator<RegisterModal>, RegisterModalValidator>();
-
             // Inject BL 
             services.AddScoped<IAuthBL, AuthBL>();
             return services;

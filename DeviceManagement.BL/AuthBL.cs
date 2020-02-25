@@ -3,6 +3,7 @@ using DeviceManagement.BL.Contracts;
 using DeviceManagement.BL.Dto;
 using DeviceManagement.BL.Modal;
 using DeviceManagement.DL.Contracts.UnitOfWork;
+using DeviceManagement.DL.Enum;
 using DeviceManagement.DL.Modal;
 using System;
 using System.Collections.Generic;
@@ -81,6 +82,7 @@ namespace DeviceManagement.BL
             var model = _mapper.Map<User>(user);
             model.PasswordHash = passwordHash;
             model.PasswordSalt = passwordSalt;
+            model.RoleId = (byte)RoleType.User;
 
             _uow.Users.CreateUser(model);
             await _uow.CompleteAsync();
